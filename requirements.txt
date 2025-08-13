@@ -1,0 +1,35 @@
+# === REQUIREMENTS CORRIGÉ - Observatoire TDAH ===
+
+# === CORE DATA SCIENCE ===
+pandas>=1.5.0,<3.0.0
+numpy>=1.21.0,<2.0.0
+scipy>=1.9.0,<2.0.0
+
+# === VISUALISATION ===
+matplotlib>=3.5.0,<4.0.0
+seaborn>=0.11.0,<1.0.0
+plotly>=5.10.0,<6.0.0
+
+# === ANALYSE STATISTIQUE ===
+statsmodels>=0.13.0,<1.0.0
+scikit-learn>=1.1.0,<2.0.0
+
+# === JUPYTER ===
+jupyter>=1.0.0,<2.0.0
+ipywidgets>=7.6.0,<9.0.0
+
+# === DATA IMPORT/EXPORT ===
+openpyxl>=3.0.9,<4.0.0
+requests>=2.25.0,<3.0.0
+
+# === GÉOSPATIAL (optionnel au début) ===
+# geopandas>=0.11.0,<1.0.0
+# folium>=0.12.0,<1.0.0
+
+# === QUALITÉ CODE ===
+black>=22.0.0,<24.0.0
+flake8>=4.0.0,<7.0.0
+
+# === UTILITAIRES ===
+tqdm>=4.60.0,<5.0.0
+python-dateutil>=2.8.0,<3.0.0
