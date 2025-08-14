@@ -1,0 +1,28 @@
+{
+    "endpoints": {
+        "population": {
+            "url": "catalogue/donnees-locales/V0.1/donnees",
+            "variables": ["P22_POP0014", "P22_POP1529"],
+            "description": "Population 0-14 ans et 15-29 ans par région"
+        },
+        "pauvrete": {
+            "url": "catalogue/donnees-locales/V0.1/donnees", 
+            "variables": ["NBPAUV", "TXPAUV"],
+            "description": "Nombre et taux de pauvreté"
+        }
+    },
+    "codes_regions": {
+        "11": "Île-de-France",
+        "24": "Centre-Val de Loire", 
+        "27": "Bourgogne-Franche-Comté",
+        "28": "Normandie",
+        "32": "Hauts-de-France",
+        "44": "Grand Est",
+        "52": "Pays de la Loire",
+        "53": "Bretagne",
+        "75": "Nouvelle-Aquitaine",
+        "76": "Occitanie",
+        "84": "Auvergne-Rhône-Alpes",
+        "93": "Provence-Alpes-Côte d'Azur"
+    }
+}
