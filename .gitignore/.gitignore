@@ -1,98 +1,64 @@
-# ============================================================================
+# ================
 # .gitignore pour projet Observatoire TDAH France
-# Data Science / Analyse médicale
-# ============================================================================
+# ================
 
 # Environnements Python
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
-observatoire_tdah_env/
 .venv/
+observatoire_tdah_env/
 pyvenv.cfg
 
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
 *.so
-.Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
-MANIFEST
 
 # Jupyter Notebook
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
 .ipynb_checkpoints/
 *.ipynb
 
-# IPython
-profile_default/
-ipython_config.py
-
 # Variables d'environnement et configuration sensible
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-config.ini
+.env*
+config/api_credentials.json
+config/*_prod.json
 secrets.yaml
 api_keys.txt
 
-# ============================================================================
+# ================
 # DONNÉES SENSIBLES (CRITIQUES pour projet médical)
-# ============================================================================
-
-# Données patient/médicales (RGPD/anonymisation)
+# ================
+# Données patient/médicales (RGPD)
 data/raw/**/*.csv
 data/raw/**/*.xlsx
 data/raw/**/*.json
-data/raw/**/*.xml
-data/processed/patient_data*
 data/external/ansm_raw*
-data/interim/identifiable*
+data/processed/patient_data*
 
-# Sauvegardez uniquement la structure, pas les données
+# Préserver la structure
 !data/raw/.gitkeep
 !data/processed/.gitkeep
-!data/external/.gitkeep
-!data/interim/.gitkeep
+!data/cache/.gitkeep
 
-# Clés API et tokens
-**/api_keys/
-**/tokens/
-ansm_api_key*
-insee_token*
+# Cache et temporaires
+data/cache/**/*
+.requests-cache.sqlite
 
-# ============================================================================
+# ================
 # OUTPUTS ET LOGS
-# ============================================================================
-
-# Résultats et rapports
+# ================
+# Rapports générés
 outputs/*.html
 outputs/*.pdf
 outputs/figures/*.png
-outputs/figures/*.jpg
-outputs/tables/*.csv
+data/processed/donnees_consolidees_*.csv
 logs/
 *.log
 
@@ -101,109 +67,39 @@ powerbi/*.pbix.tmp
 powerbi/backup/
 powerbi/cache/
 
-# ============================================================================
-# IDE ET EDITEURS
-# ============================================================================
-
-# VSCode
+# ================
+# IDE
+# ================
+# VSCode (garder template)
 .vscode/settings.json
 .vscode/launch.json
-.vscode/extensions.json
-.vscode/c_cpp_properties.json
-.vscode/tasks.json
 !.vscode/settings.template.json
 
 # PyCharm
 .idea/
-*.iws
-*.iml
-*.ipr
 
-# Sublime Text
-*.tmlanguage.cache
-*.tmPreferences.cache
-*.stTheme.cache
-*.sublime-workspace
-*.sublime-project
-
-# ============================================================================
-# SYSTÈME ET TEMPORAIRES
-# ============================================================================
-
+# ================
+# SYSTÈME
+# ================
 # Windows
 Thumbs.db
-ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
 
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-Icon
 
-# Linux
-*~
-.nfs*
-
-# Fichiers temporaires
+# Temporaires
 *.tmp
 *.temp
 *.swp
-*.swo
 *~
-.#*
-#*#
 
-# ============================================================================
-# ANALYSE ET MODÈLES
-# ============================================================================
-
-# Modèles ML sauvegardés (trop lourds)
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/*.onnx
-!models/.gitkeep
-
-# Cache des bibliothèques
-.cache/
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# ============================================================================
-# DOCUMENTATION
-# ============================================================================
-
-# Documentation générée
-docs/_build/
-docs/build/
-site/
-
-# ============================================================================
-# SPÉCIFIQUE AU PROJET TDAH
-# ============================================================================
-
-# Données ANSM sensibles
+# ================
+# SPÉCIFIQUE PROJET TDAH
+# ================
+# Données sensibles spécifiques
 data/raw/ansm/
 data/raw/cpam/
-data/raw/insee_detaille/
-
-# Rapports confidentiels
 outputs/rapports_confidentiels/
-outputs/analyses_nominatives/
-
-# Configuration locale
 config_local.yaml
-database_local.ini
