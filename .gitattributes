@@ -1,0 +1,28 @@
+# Observatoire TDAH France - .gitattributes
+# ================================================
+# ============ GIT LFS TRACKING ============
+# Fichiers de données volumineux
+*.csv filter=lfs diff=lfs merge=lfs -text
+*.xlsx filter=lfs diff=lfs merge=lfs -text
+*.xls filter=lfs diff=lfs merge=lfs -text
+# Modèles ML et données sérialisées
+*.pkl filter=lfs diff=lfs merge=lfs -text
+*.pickle filter=lfs diff=lfs merge=lfs -text
+*.joblib filter=lfs diff=lfs merge=lfs -text
+# Fichiers Power BI
+*.pbix filter=lfs diff=lfs merge=lfs -text
+# Images et visualisations
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+# ============ FORMATS TEXTE ============
+# Assurer les fins de ligne correctes
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+# ============ NOTEBOOKS JUPYTER ============
+*.ipynb text eol=lf

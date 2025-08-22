@@ -1,0 +1,22 @@
+{
+    "sources": {
+        "insee": {
+            "nom": "Institut National de la Statistique et des Études Économiques",
+            "url": "https://www.insee.fr",
+            "donnees_utilisees": ["population", "pauvrete"],
+            "derniere_maj": "2024-01-01"
+        },
+        "drees": {
+            "nom": "Direction de la Recherche, des Études et des Statistiques",
+            "url": "https://drees.solidarites-sante.gouv.fr",
+            "donnees_utilisees": ["demographie_medicale"],
+            "derniere_maj": "2023-12-01"
+        },
+        "ansm": {
+            "nom": "Agence Nationale de Sécurité du Médicament",
+            "url": "https://ansm.sante.fr",
+            "donnees_utilisees": ["prescriptions_methylphenidate"],
+            "derniere_maj": "2024-06-01"
+        }
+    }
+}
