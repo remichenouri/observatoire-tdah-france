@@ -1,0 +1,178 @@
+# Observatoire TDAH France - .gitignore
+# ==============================================
+
+# ============ FICHIERS SENSIBLES ============
+# Credentials et configurations sensibles
+api_credentials.json
+clinic_config.yml
+source_donnees.json
+config/local_*.yml
+config/prod_*.yml
+.env
+.env.local
+.env.production
+
+# Clés API et tokens
+*.key
+*.pem
+*.p12
+tokens/
+secrets/
+
+# ============ DONNÉES VOLUMINEUSES ============
+# Données brutes et externes (utiliser Git LFS si nécessaire)
+data/raw/*.csv
+data/external/*.csv
+data/processed/*.csv
+data/cache/
+*.pkl
+*.pickle
+
+# Power BI et fichiers volumineux
+power_bi/*.pbix
+power_bi/*.csv
+*.xlsx
+*.xls
+outputs/*.png
+outputs/*.jpg
+outputs/*.pdf
+
+# ============ PYTHON ============
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+observatoiretdahenv/
+
+# ============ EDITEURS / IDE ============
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+*.swp
+*.swo
+*~
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============ SYSTÈME ============
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.lnk
+
+# ============ LOGS ET TEMPORAIRES ============
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.tmp
+
+# ============ SPÉCIFIQUE OBSERVATOIRE TDAH ============
+# Rapports générés automatiquement
+reports/generated/
+notebooks/checkpoints/
+src/__pycache__/
+src/collectors/__pycache__/
+
+# Données de test locales
+test_data/
+mock_data/
+sandbox/
+
+# Sauvegardes locales
+backup/
+*.backup
+*.bak
+
+# Fichiers de configuration locale
+local_settings.py
+settings_local.py
+
+# ============ GIT LFS TRACKING ============
+# Les gros fichiers suivants utilisent Git LFS
+# (à configurer avec: git lfs track "*.csv")
+# *.csv filter=lfs diff=lfs merge=lfs -text
+# *.xlsx filter=lfs diff=lfs merge=lfs -text
+# *.pkl filter=lfs diff=lfs merge=lfs -text
