@@ -10,7 +10,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
-import seaborn as sns
+try:
+    import seaborn as sns
+    HAS_SEABORN = True
+except ImportError:
+    HAS_SEABORN = False
+    import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 from datetime import datetime
 import io
