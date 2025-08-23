@@ -10,7 +10,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import folium
 from streamlit_folium import st_folium
-import geopandas as gpd
+try:
+    import geopandas as gpd
+    HAS_GEOPANDAS = True
+except ImportError:
+    HAS_GEOPANDAS = False
 from datetime import datetime
 import json
 
