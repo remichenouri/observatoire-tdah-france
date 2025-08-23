@@ -1,0 +1,19 @@
+
+RAPPORT SYNTHÈSE - EXPLORATION TDAH FRANCE
+==========================================
+
+📊 DATASETS ANALYSÉS:
+- Densité pédopsychiatres: 13 régions
+- Pauvreté régionale: 13 régions  
+- Méthylphénidate: 52 observations temporelles
+- Population INSEE: 13 régions
+
+🔍 QUALITÉ DONNÉES:
+- Aucun doublon détecté
+- Aucune valeur manquante
+- 0 corrélations fortes identifiées
+
+📈 TENDANCES CLÉS:
+- Évolution méthylphénidate: +28.9% (2020-2023)
+- Corrélation pauvreté-soins: -0.040
+- Régions à surveiller: celles avec forte pauvreté ET faible densité soins
