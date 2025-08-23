@@ -1,0 +1,187 @@
+# Configuration spécifique à vos données réelles - Observatoire TDAH France
+data_sources:
+  densite_podopsychiatres: "data/raw/densite_podopsychiatres_drees.csv"
+  population_insee: "data/raw/insee_population_2022.csv" 
+  methylphenidate: "data/raw/methylphenidate_utilisation.csv"
+  pauvrete_regionale: "data/raw/pauvrete_regionale_2023.csv"
+
+regional_mapping:
+  # Régions métropolitaines
+  ile_de_france: "11"
+  centre_val_de_loire: "24"
+  bourgogne_franche_comte: "27"
+  normandie: "28"
+  hauts_de_france: "32"
+  grand_est: "44"
+  pays_de_la_loire: "52"
+  bretagne: "53"
+  nouvelle_aquitaine: "75"
+  occitanie: "76"
+  auvergne_rhone_alpes: "84"
+  provence_alpes_cote_azur: "93"
+  corse: "94"
+  
+  # Départements et Régions d'Outre-Mer (DROM)
+  guadeloupe: "01"
+  martinique: "02"
+  guyane: "03"
+  la_reunion: "04"
+  mayotte: "06"
+
+# Mapping alternatif pour les variations d'écriture
+regional_aliases:
+  # Île-de-France
+  "idf": "11"
+  "ile-de-france": "11"
+  "île-de-france": "11"
+  "paris": "11"
+  
+  # PACA
+  "paca": "93"
+  "provence-alpes-côte d'azur": "93"
+  "provence-alpes-cote d'azur": "93"
+  "sud": "93"
+  
+  # Auvergne-Rhône-Alpes
+  "auvergne-rhône-alpes": "84"
+  "auvergne-rhone-alpes": "84"
+  "ara": "84"
+  "rhone-alpes": "84"
+  "auvergne": "84"
+  
+  # Nouvelle-Aquitaine
+  "nouvelle-aquitaine": "75"
+  "aquitaine": "75"
+  "poitou-charentes": "75"
+  "limousin": "75"
+  
+  # Occitanie
+  "occitanie": "76"
+  "languedoc-roussillon": "76"
+  "midi-pyrenees": "76"
+  "midi-pyrénées": "76"
+  
+  # Grand Est
+  "grand est": "44"
+  "grand-est": "44"
+  "alsace": "44"
+  "lorraine": "44"
+  "champagne-ardenne": "44"
+  
+  # Hauts-de-France
+  "hauts-de-france": "32"
+  "nord-pas-de-calais": "32"
+  "picardie": "32"
+  "nord": "32"
+  
+  # Bourgogne-Franche-Comté
+  "bourgogne-franche-comte": "27"
+  "bourgogne-franche-comté": "27"
+  "bourgogne": "27"
+  "franche-comte": "27"
+  "franche-comté": "27"
+  
+  # Centre-Val de Loire
+  "centre-val de loire": "24"
+  "centre": "24"
+  "val de loire": "24"
+  
+  # Pays de la Loire
+  "pays de la loire": "52"
+  "loire": "52"
+  
+  # Normandie
+  "normandie": "28"
+  "basse-normandie": "28"
+  "haute-normandie": "28"
+  
+  # Bretagne
+  "bretagne": "53"
+  
+  # Corse
+  "corse": "94"
+  "corsica": "94"
+  
+  # DROM
+  "la réunion": "04"
+  "la-reunion": "04"
+  "reunion": "04"
+
+quality_thresholds:
+  missing_rate_max: 0.25  # 25% max de données manquantes
+  outlier_zscore: 2.5
+  correlation_threshold: 0.9
+  min_sample_size: 30
+
+# Configuration spécifique TDAH
+tdah_config:
+  age_groups:
+    enfant: [0, 6]
+    pre_adolescent: [7, 11]
+    adolescent: [12, 17]
+    jeune_adulte: [18, 25]
+    adulte: [26, 64]
+    senior: [65, 100]
+  
+  medicament_categories:
+    stimulants:
+      - "methylphenidate"
+      - "ritaline"
+      - "concerta"
+      - "quasym"
+      - "medikinet"
+    non_stimulants:
+      - "atomoxetine" 
+      - "strattera"
+    autres:
+      - "guanfacine"
+      - "clonidine"
+
+# Configuration des seuils par indicateur
+indicators_thresholds:
+  densite_podopsychiatres:
+    tres_faible: [0, 2]      # pour 100 000 habitants < 18 ans
+    faible: [2, 5]
+    moyenne: [5, 10]
+    elevee: [10, 20]
+    tres_elevee: [20, 100]
+  
+  prevalence_tdah:
+    faible: [0, 3]           # pourcentage
+    moyenne: [3, 6]
+    elevee: [6, 10]
+    tres_elevee: [10, 100]
+  
+  pauvrete_infantile:
+    faible: [0, 10]          # pourcentage
+    moyenne: [10, 20]
+    elevee: [20, 30]
+    critique: [30, 100]
+
+# Configuration des jointures
+join_strategies:
+  primary_geographic_key: "code_region_insee"
+  temporal_alignment:
+    reference_year: 2022
+    tolerance_years: 2
+  
+  required_columns:
+    densite_podopsychiatres: ["code_region", "densite_pour_100k", "annee"]
+    population_insee: ["code_region", "population_0_17", "annee"]
+    methylphenidate: ["region", "consommation_ddd", "periode"]
+    pauvrete_regionale: ["code_insee", "taux_pauvrete_enfants", "annee"]
+
+# Configuration de validation
+validation_rules:
+  geographic_coverage:
+    min_regions_required: 13  # Au moins 13 régions métropolitaines
+    require_overseas: false   # DROM optionnels
+  
+  temporal_coverage:
+    min_years: 3
+    max_gap_years: 1
+  
+  data_quality:
+    max_missing_per_indicator: 0.2
+    min_correlation_threshold: 0.1
+
