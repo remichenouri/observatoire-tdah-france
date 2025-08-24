@@ -9,8 +9,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import folium
-from streamlit_folium import st_folium
 
 def show_epidemiology():
     """
@@ -89,14 +87,16 @@ def show_epidemiology():
     with tab1:
         st.markdown("### Prévalence TDAH par Région")
         
-        # Graphique en barres interactif
+        # Graphique en barres interactif (VERSION CORRIGÉE)
+        df_sorted = df_regions.sort_values('Prévalence (%)', ascending=False)
+        
         fig_prevalence = px.bar(
-            df_regions.sort_values('Prévalence (%)', ascending=False),
+            df_sorted,
             x='Région',
             y='Prévalence (%)',
             title="Prévalence TDAH par Région (6-17 ans)",
             color='Prévalence (%)',
-            color_continuous_scale='RdYlOrRd',
+            color_continuous_scale='Reds',  # Changé de 'RdYlOrRd' à 'Reds'
             text='Prévalence (%)'
         )
         fig_prevalence.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
@@ -130,7 +130,8 @@ def show_epidemiology():
             labels={
                 'Délai diagnostic (mois)': 'Délai Diagnostic (mois)',
                 'Taux diagnostic (%)': 'Taux de Diagnostic (%)'
-            }
+            },
+            color_continuous_scale='Viridis'  # Changé pour éviter les erreurs
         )
         fig_delais.add_hline(y=60, line_dash="dash", line_color="red", 
                             annotation_text="Objectif 60%")
@@ -141,36 +142,25 @@ def show_epidemiology():
     with tab3:
         st.markdown("### Taux de Diagnostic par Région")
         
-        # Graphique en radar
-        fig_radar = go.Figure()
-        
-        fig_radar.add_trace(go.Scatterpolar(
-            r=df_regions['Taux diagnostic (%)'],
-            theta=df_regions['Région'],
-            fill='toself',
-            name='Taux de Diagnostic',
-            line_color='rgb(102, 126, 234)'
-        ))
-        
-        fig_radar.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 100]
-                )
-            ),
+        # Graphique en barres horizontales (plus simple que le radar)
+        fig_diagnostic = px.bar(
+            df_regions.sort_values('Taux diagnostic (%)', ascending=True),
+            x='Taux diagnostic (%)',
+            y='Région',
             title="Taux de Diagnostic TDAH par Région",
-            height=600
+            orientation='h',
+            color='Taux diagnostic (%)',
+            color_continuous_scale='Blues'
         )
-        
-        st.plotly_chart(fig_radar, use_container_width=True)
+        fig_diagnostic.update_layout(height=600)
+        st.plotly_chart(fig_diagnostic, use_container_width=True)
     
     with tab4:
         st.markdown("### Analyse Comparative Multi-dimensionnelle")
         
         # Heatmap de corrélation
-        corr_data = df_regions[['Prévalence (%)', 'Taux diagnostic (%)', 
-                               'Délai diagnostic (mois)', 'Cas estimés']].corr()
+        numeric_columns = ['Prévalence (%)', 'Taux diagnostic (%)', 'Délai diagnostic (mois)', 'Cas estimés']
+        corr_data = df_regions[numeric_columns].corr()
         
         fig_heatmap = px.imshow(
             corr_data,
@@ -203,20 +193,14 @@ def show_epidemiology():
         )
     
     # Tableau filtré et trié
-    df_filtered = df_regions[df_regions['Région'].isin(regions_selected)]
-    df_sorted = df_filtered.sort_values(metric_sort, ascending=False)
-    
-    # Mise en forme du tableau
-    st.dataframe(
-        df_sorted.style.format({
-            'Prévalence (%)': '{:.1f}%',
-            'Cas estimés': '{:,}',
-            'Population 6-17 ans': '{:,}',
-            'Taux diagnostic (%)': '{:.1f}%',
-            'Délai diagnostic (mois)': '{:.1f}'
-        }).background_gradient(subset=['Prévalence (%)'], cmap='RdYlOrRd'),
-        use_container_width=True
-    )
+    if regions_selected:  # Vérification que des régions sont sélectionnées
+        df_filtered = df_regions[df_regions['Région'].isin(regions_selected)]
+        df_sorted = df_filtered.sort_values(metric_sort, ascending=False)
+        
+        # Affichage du tableau
+        st.dataframe(df_sorted, use_container_width=True)
+    else:
+        st.warning("Veuillez sélectionner au moins une région.")
     
     # === TENDANCES ET PROJECTIONS ===
     st.markdown("---")
