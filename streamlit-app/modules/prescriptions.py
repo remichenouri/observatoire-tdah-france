@@ -1,143 +1,132 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import numpy as np
+import plotly.graph_objects as go
 from datetime import datetime
+from statsmodels.tsa.seasonal import STL
 
 def load_prescriptions_data(path: str) -> pd.DataFrame:
-    """
-    Charge et nettoie les données de prescriptions TDAH.
-    Colonnes attendues : 
-      - date_prescription (YYYY-MM-DD)
-      - département
-      - médicament (Méthylphénidate, Lisdexamfétamine, etc.)
-      - âge_patient
-      - sexe_patient
-      - nombre_doses
-    """
     df = pd.read_csv(path, parse_dates=['date_prescription'])
-    df = df.dropna(subset=['date_prescription', 'département', 'médicament'])
+    df = df.dropna(subset=['date_prescription', 'département', 'médicament', 'nombre_doses'])
     df['année'] = df['date_prescription'].dt.year
-    df['mois'] = df['date_prescription'].dt.to_period('M')
+    df['mois'] = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
     return df
 
 def show_prescriptions():
-    st.header("💊 Suivi des Prescriptions TDAH")
+    st.header("💊 Suivi Avancé des Prescriptions TDAH")
     st.markdown("""
-    Ce module présente :
-    - Évolution annuelle des prescriptions (2018–2024)  
-    - Répartition par type de médicament  
-    - Cartographie des volumes par département  
-    - Profil démographique (âge, sexe)  
-    - Alertes de hausse significative  
+    Cette section propose :
+    1. Évolution mensuelle et cumul annuel  
+    2. Dosage moyen et répartition (quantiles)  
+    3. Segmentation par âge et sexe  
+    4. Décomposition saisonnière de la série temporelle  
+    5. Comparaison dynamique des médicaments  
+    6. Cartographie interactive par période  
+    7. Export Tableaux et Séries  
     """)
 
-    # 1. Chargement
-    data_file = st.sidebar.file_uploader("Téléverser le CSV des prescriptions", type=['csv'])
-    if not data_file:
-        st.warning("Veuillez importer un fichier CSV pour afficher les analyses.")
+    # Téléversement
+    file = st.sidebar.file_uploader("Importer CSV prescriptions", type="csv")
+    if not file:
+        st.warning("Importez un fichier CSV pour démarrer l'analyse.")
         return
+    df = load_prescriptions_data(file)
 
-    df = load_prescriptions_data(data_file)
-    st.session_state.current_data = df
-
-    # 2. KPI globaux
-    col1, col2, col3 = st.columns(3)
-    total_presc = len(df)
-    années = sorted(df['année'].unique())
-    dernières = df[df['année'] == max(années)]
-    col1.metric("Prescriptions totales", f"{total_presc:,}")
-    col2.metric("Années couvertes", f"{min(années)}–{max(années)}")
-    col3.metric("Prescriptions {}" .format(max(années)), f"{len(dernières):,}")
+    # KPI principaux
+    st.subheader("Indicateurs clés")
+    total = len(df)
+    years = sorted(df['année'].unique())
+    st.metric("Prescriptions Totales", f"{total:,}")
+    st.metric("Années Couvertes", f"{years[0]}–{years[-1]}")
+    st.metric("Dose Moyenne par Recette", f"{df['nombre_doses'].mean():.1f}")
 
     st.markdown("---")
 
-    # 3. Évolution temporelle 2018–2024
-    st.subheader("Évolution annuelle des prescriptions")
-    hist = (df
-            .groupby('année')
-            .size()
-            .reset_index(name='count')
-            .sort_values('année'))
-    fig1 = px.bar(hist,
-                  x='année', y='count',
-                  labels={'année': 'Année', 'count': 'Nombre de prescriptions'},
-                  title="Prescriptions TDAH par année")
-    st.plotly_chart(fig1, use_container_width=True)
+    # 1. Évolution mensuelle & cumul annuel
+    st.subheader("Évolution Temporelle")
+    monthly = df.groupby('mois').size().rename('count').reset_index()
+    yearly_cum = df.groupby(['année']).size().cumsum().reset_index(name='cumul')
+    fig_time = go.Figure()
+    fig_time.add_trace(go.Scatter(x=monthly['mois'], y=monthly['count'],
+                                  mode='lines', name='Mensuel'))
+    fig_time.add_trace(go.Bar(x=yearly_cum['année'].astype(str), y=yearly_cum['cumul'],
+                              name='Cumul Annuel', opacity=0.5))
+    fig_time.update_layout(title="Prescriptions Mensuelles et Cumul Annuel",
+                           xaxis_title="Date", yaxis_title="Nombre")
+    st.plotly_chart(fig_time, use_container_width=True)
 
-    # 4. Analyse par médicament
-    st.subheader("Répartition par type de médicament")
-    meds = (df
-            .groupby('médicament')
-            .size()
-            .reset_index(name='count')
-            .sort_values('count', ascending=False))
-    fig2 = px.pie(meds,
-                  names='médicament', values='count',
-                  title="Parts de marché par médicament")
-    st.plotly_chart(fig2, use_container_width=True)
+    # 2. Dosage moyen et quantiles
+    st.subheader("Dosage par Médicament")
+    dose_stats = df.groupby('médicament')['nombre_doses'] \
+                   .agg(['mean','median', lambda x: x.quantile(0.25), lambda x: x.quantile(0.75)]) \
+                   .rename(columns={'<lambda_0>':'Q1','<lambda_1>':'Q3'}) \
+                   .reset_index()
+    st.dataframe(dose_stats.style.format({
+        'mean': '{:.1f}', 'median': '{:.1f}', 'Q1': '{:.1f}', 'Q3': '{:.1f}'
+    }))
 
-    # 5. Cartographie géographique
-    st.subheader("Cartographie des prescriptions par département")
-    dept_counts = (df
-                   .groupby('département')
-                   .size()
-                   .reset_index(name='count'))
-    # Utiliser un GeoJSON de la France disponible localement ou via URL
-    geojson_path = "data/france_departements.geojson"
-    try:
-        fig3 = px.choropleth_mapbox(
-            dept_counts, geojson=geojson_path, locations='département',
-            featureidkey="properties.code", color='count',
-            color_continuous_scale="Viridis", mapbox_style="carto-positron",
-            zoom=4.5, center={"lat": 46.6, "lon": 2.5},
-            labels={'count': 'Nb presc.'},
-            title="Volume de prescriptions par département"
-        )
-        st.plotly_chart(fig3, use_container_width=True)
-    except Exception as e:
-        st.error(f"Erreur cartographie : {e}")
+    # 3. Segmentation âge et sexe
+    st.subheader("Profil Démographique")
+    age_bins = [0,6,12,18,30,45,60,100]
+    df['tranche_age'] = pd.cut(df['âge_patient'], age_bins, right=False)
+    demo = df.groupby(['tranche_age','sexe_patient']).size().reset_index(name='count')
+    fig_demo = px.bar(demo, x='tranche_age', y='count', color='sexe_patient',
+                      barmode='group', title="Répartition par Tranche d'Âge et Sexe")
+    st.plotly_chart(fig_demo, use_container_width=True)
 
-    # 6. Démographie
-    st.subheader("Données démographiques")
-    col_age, col_sex = st.columns(2)
-    with col_age:
-        age_dist = df['âge_patient'].dropna().astype(int)
-        fig4 = px.histogram(age_dist,
-                            nbins=20,
-                            title="Distribution des âges")
-        st.plotly_chart(fig4, use_container_width=True)
-    with col_sex:
-        sex_dist = (df
-                    .groupby('sexe_patient')
-                    .size()
-                    .reset_index(name='count'))
-        fig5 = px.bar(sex_dist, x='sexe_patient', y='count',
-                      labels={'sexe_patient': 'Sexe', 'count': 'Nombre'},
-                      title="Répartition par sexe")
-        st.plotly_chart(fig5, use_container_width=True)
+    # 4. Décomposition saisonnière
+    st.subheader("Analyse Saisonnière (STL)")
+    ts = monthly.set_index('mois')['count']
+    stl = STL(ts, period=12, robust=True).fit()
+    fig_stl = make_stl_plot(stl)
+    st.plotly_chart(fig_stl, use_container_width=True)
 
-    # 7. Alertes d'augmentation
-    st.subheader("⚠️ Alertes de hausse annuelle")
-    seuil_pct = st.slider("Seuil d'augmentation (%)", 0, 100, 20)
-    year_over_year = hist.copy()
-    year_over_year['prev'] = year_over_year['count'].shift(1)
-    year_over_year['pct_change'] = ((year_over_year['count'] - year_over_year['prev']) / year_over_year['prev']) * 100
-    alerts = year_over_year[year_over_year['pct_change'] > seuil_pct]
-    if alerts.empty:
-        st.success("Aucune hausse supérieure à {} % détectée.".format(seuil_pct))
-    else:
-        for _, row in alerts.iterrows():
-            st.warning(f"Entre {int(row['année']-1)} et {int(row['année'])} : +{row['pct_change']:.1f}%")
+    # 5. Comparaison dynamique des médicaments
+    st.subheader("Parts de Marché Dynamiques")
+    pivot = df.groupby(['mois','médicament']).size().unstack(fill_value=0)
+    pct = pivot.divide(pivot.sum(axis=1), axis=0).reset_index()
+    fig_dyn = px.area(pct, x='mois', y=pivot.columns,
+                      title="Évolution des parts de marché par médicament")
+    st.plotly_chart(fig_dyn, use_container_width=True)
 
-    # 8. Export des résultats
+    # 6. Cartographie interactive
+    st.subheader("Carte Interactive")
+    period = st.slider("Période", 
+                       min_value=monthly['mois'].min(), 
+                       max_value=monthly['mois'].max(),
+                       value=(monthly['mois'].min(), monthly['mois'].max()),
+                       format="YYYY-MM")
+    df_map = df[(df['mois']>=period[0]) & (df['mois']<=period[1])]
+    dept = df_map.groupby('département').size().reset_index(name='count')
+    geo = "data/france_departements.geojson"
+    map_fig = px.choropleth_mapbox(dept, geojson=geo, locations='département',
+                                   featureidkey="properties.code", color='count',
+                                   color_continuous_scale="Turbo",
+                                   mapbox_style="carto-positron",
+                                   zoom=5, center={"lat":46, "lon":2},
+                                   title="Volume prescriptions par Département")
+    st.plotly_chart(map_fig, use_container_width=True)
+
+    # 7. Export avancé
     st.markdown("---")
-    if st.button("Exporter les statistiques clés"):
-        stats = hist.merge(meds, how='cross')
-        stats_csv = stats.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Télécharger CSV",
-            data=stats_csv,
-            file_name=f"stats_prescriptions_{datetime.now().date()}.csv",
-            mime="text/csv"
-        )
+    st.subheader("Export des Données")
+    df_out = df.copy()
+    if st.download_button("Télécharger Tout (CSV)", df_out.to_csv(index=False), 
+                           "prescriptions_full.csv", "text/csv"):
+        pass
+    if st.download_button("Télécharger Statistiques (JSON)", 
+                          df_out.describe(include='all').to_json(), 
+                          "prescriptions_stats.json", "application/json"):
+        pass
+
+def make_stl_plot(stl_result):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=stl_result.observed.index, y=stl_result.observed.values,
+                             name='Observé'))
+    fig.add_trace(go.Scatter(x=stl_result.trend.index, y=stl_result.trend.values,
+                             name='Tendance'))
+    fig.add_trace(go.Scatter(x=stl_result.seasonal.index, y=stl_result.seasonal.values,
+                             name='Saisonnalité'))
+    fig.update_layout(title="Décomposition STL de la Série Temporelle",
+                      xaxis_title="Date", yaxis_title="Nombre de prescriptions")
+    return fig
