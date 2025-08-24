@@ -6,35 +6,23 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 from statsmodels.tsa.seasonal import STL
-
-
-import streamlit as st
-import pandas as pd
-from pathlib import Path
-
-@st.cache_data(show_spinner=False)
-# modules/prescriptions.py
-
-import streamlit as st
-import pandas as pd
 from pathlib import Path
 
 @st.cache_data(show_spinner=False)
 def load_prescriptions_data() -> pd.DataFrame:
     """
     Charge en cache le dataset complet de prescriptions TDAH.
-    Le fichier prescriptions.parquet doit être placé dans le dossier racine 'data/'.
+    Le fichier prescriptions_2018_2024.csv doit être placé dans le dossier 'data/' à la racine du projet.
     """
-    # __file__ pointe vers modules/prescriptions.py
     module_dir = Path(__file__).parent
-    project_root = module_dir.parent.parent  # remonte de modules/ à apps/ et ensuite à projet racine
+    project_root = module_dir.parent.parent  # remonte de modules/ à apps/ puis au projet racine
     data_path = project_root / "data" / "prescriptions_2018_2024.csv"
 
     if not data_path.exists():
         st.error(f"Fichier introuvable : {data_path}")
-        return pd.DataFrame()  # retourne un DataFrame vide pour éviter le crash
+        return pd.DataFrame()
 
-    df = pd.read_parquet(data_path)
+    df = pd.read_csv(data_path, parse_dates=['date_prescription'])
     df = df.dropna(subset=[
         'date_prescription',
         'département',
@@ -43,9 +31,8 @@ def load_prescriptions_data() -> pd.DataFrame:
         'sexe_patient',
         'nombre_doses'
     ])
-    df['date_prescription'] = pd.to_datetime(df['date_prescription'])
-    df['année']  = df['date_prescription'].dt.year
-    df['mois']   = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
+    df['année'] = df['date_prescription'].dt.year
+    df['mois'] = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
     return df
 
 def make_stl_plot(stl_result):
@@ -64,8 +51,11 @@ def make_stl_plot(stl_result):
 def show_prescriptions():
     st.header("💊 Suivi Avancé des Prescriptions TDAH")
 
-    # Chargement automatique sans upload
+    # Chargement automatique
     df = load_prescriptions_data()
+    if df.empty:
+        return
+
     st.session_state.current_data = df
     st.session_state.data_loaded = True
 
@@ -135,7 +125,7 @@ def show_prescriptions():
 
     # 6. Carte interactive
     st.subheader("Cartographie Interactive")
-    geojson_path = "data/france_departements.geojson"
+    geojson_path = Path(__file__).parent.parent.parent / "data" / "france_departements.geojson"
     med_filter = st.multiselect(
         "Filtrer par médicament", df['médicament'].unique(),
         default=list(df['médicament'].unique()))
@@ -152,7 +142,7 @@ def show_prescriptions():
     ]
     dept_counts = df_map.groupby('département').size().reset_index(name='count')
     fig_map = px.choropleth_mapbox(
-        dept_counts, geojson=geojson_path, locations='département',
+        dept_counts, geojson=str(geojson_path), locations='département',
         featureidkey="properties.code", color='count',
         color_continuous_scale="Viridis", mapbox_style="carto-positron",
         zoom=5, center={"lat":46.6, "lon":2.5},
@@ -180,15 +170,11 @@ def show_prescriptions():
 
     # 9. Export avancé
     st.markdown("---")
-    if st.download_button(
+    st.download_button(
         "Télécharger Tout (CSV)",
         df.to_csv(index=False), "prescriptions_full.csv", "text/csv"
-    ):
-        pass
-    if st.download_button(
+    )
+    st.download_button(
         "Télécharger Statistiques (JSON)",
         df.describe(include='all').to_json(), "prescriptions_stats.json", "application/json"
-    ):
-        pass
-
-
+    )
