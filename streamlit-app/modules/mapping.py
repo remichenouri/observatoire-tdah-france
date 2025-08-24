@@ -691,7 +691,8 @@ def create_regional_comparison_viz(data, metric, regions):
             color='Value',
             color_continuous_scale='Viridis'
         )
-        fig_bar.update_xaxis(tickangle=45)
+        fig_bar.update_xaxes(tickangle=45)  # ← ADD THE 'S'
+
         st.plotly_chart(fig_bar, use_container_width=True)
     
     with col2:
