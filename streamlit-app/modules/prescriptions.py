@@ -13,20 +13,36 @@ import pandas as pd
 from pathlib import Path
 
 @st.cache_data(show_spinner=False)
+# modules/prescriptions.py
+
+import streamlit as st
+import pandas as pd
+from pathlib import Path
+
+@st.cache_data(show_spinner=False)
 def load_prescriptions_data() -> pd.DataFrame:
     """
     Charge en cache le dataset complet de prescriptions TDAH.
-    Format attendu : Parquet avec colonnes
-      - date_prescription (datetime)
-      - département (str)
-      - médicament (str)
-      - âge_patient (int)
-      - sexe_patient (str)
-      - nombre_doses (int)
+    Le fichier prescriptions.parquet doit être placé dans le dossier racine 'data/'.
     """
-    data_path = Path(__file__).parent.parent / "data" / "prescriptions.parquet"
+    # __file__ pointe vers modules/prescriptions.py
+    module_dir = Path(__file__).parent
+    project_root = module_dir.parent.parent  # remonte de modules/ à apps/ et ensuite à projet racine
+    data_path = project_root / "data" / "prescriptions_2018_2024.csv"
+
+    if not data_path.exists():
+        st.error(f"Fichier introuvable : {data_path}")
+        return pd.DataFrame()  # retourne un DataFrame vide pour éviter le crash
+
     df = pd.read_parquet(data_path)
-    df = df.dropna(subset=['date_prescription','département','médicament','âge_patient','sexe_patient','nombre_doses'])
+    df = df.dropna(subset=[
+        'date_prescription',
+        'département',
+        'médicament',
+        'âge_patient',
+        'sexe_patient',
+        'nombre_doses'
+    ])
     df['date_prescription'] = pd.to_datetime(df['date_prescription'])
     df['année']  = df['date_prescription'].dt.year
     df['mois']   = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
@@ -174,4 +190,5 @@ def show_prescriptions():
         df.describe(include='all').to_json(), "prescriptions_stats.json", "application/json"
     ):
         pass
+
 
