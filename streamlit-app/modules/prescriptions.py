@@ -7,11 +7,29 @@ import plotly.graph_objects as go
 from datetime import datetime
 from statsmodels.tsa.seasonal import STL
 
-def load_prescriptions_data(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path, parse_dates=['date_prescription'])
-    df = df.dropna(subset=['date_prescription', 'département', 'médicament', 'nombre_doses', 'âge_patient', 'sexe_patient'])
-    df['année'] = df['date_prescription'].dt.year
-    df['mois'] = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
+
+import streamlit as st
+import pandas as pd
+from pathlib import Path
+
+@st.cache_data(show_spinner=False)
+def load_prescriptions_data() -> pd.DataFrame:
+    """
+    Charge en cache le dataset complet de prescriptions TDAH.
+    Format attendu : Parquet avec colonnes
+      - date_prescription (datetime)
+      - département (str)
+      - médicament (str)
+      - âge_patient (int)
+      - sexe_patient (str)
+      - nombre_doses (int)
+    """
+    data_path = Path(__file__).parent.parent / "data" / "prescriptions.parquet"
+    df = pd.read_parquet(data_path)
+    df = df.dropna(subset=['date_prescription','département','médicament','âge_patient','sexe_patient','nombre_doses'])
+    df['date_prescription'] = pd.to_datetime(df['date_prescription'])
+    df['année']  = df['date_prescription'].dt.year
+    df['mois']   = df['date_prescription'].dt.to_period('M').dt.to_timestamp()
     return df
 
 def make_stl_plot(stl_result):
@@ -30,12 +48,8 @@ def make_stl_plot(stl_result):
 def show_prescriptions():
     st.header("💊 Suivi Avancé des Prescriptions TDAH")
 
-    file = st.sidebar.file_uploader("Importer CSV prescriptions", type="csv")
-    if not file:
-        st.warning("Importez un fichier CSV pour démarrer l'analyse.")
-        return
-
-    df = load_prescriptions_data(file)
+    # Chargement automatique sans upload
+    df = load_prescriptions_data()
     st.session_state.current_data = df
     st.session_state.data_loaded = True
 
@@ -160,3 +174,4 @@ def show_prescriptions():
         df.describe(include='all').to_json(), "prescriptions_stats.json", "application/json"
     ):
         pass
+
