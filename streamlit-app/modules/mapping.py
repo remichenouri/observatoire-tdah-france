@@ -379,9 +379,10 @@ def create_medical_density_map_viz(data, specialist_type, density_metric):
     )
     
     fig_heatmap.update_layout(height=200)
-    fig_heatmap.update_yaxis(showticklabels=False)
-
+    # ✅ CORRECTED: Changed from update_yaxis to update_yaxes
+    fig_heatmap.update_yaxes(showticklabels=False)  # ← ADD THE 'S'
     st.plotly_chart(fig_heatmap, use_container_width=True)
+
 
 def show_density_correlation_analysis(medical_data):
     """Analyse des corrélations avec la densité médicale"""
