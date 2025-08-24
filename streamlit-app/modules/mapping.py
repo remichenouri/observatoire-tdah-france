@@ -380,6 +380,7 @@ def create_medical_density_map_viz(data, specialist_type, density_metric):
     
     fig_heatmap.update_layout(height=200)
     fig_heatmap.update_yaxis(showticklabels=False)
+
     st.plotly_chart(fig_heatmap, use_container_width=True)
 
 def show_density_correlation_analysis(medical_data):
