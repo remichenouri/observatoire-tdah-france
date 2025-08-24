@@ -101,17 +101,18 @@ def main():
     
     # Barre latérale pour la navigation
     with st.sidebar:
-        st.image("https://via.placeholder.com/200x80/667eea/white?text=TDAH+Observatory", 
-                caption="Observatoire TDAH France")
-        
+        st.image(
+            "https://via.placeholder.com/200x80/667eea/white?text=TDAH+Observatory",
+            caption="Observatoire TDAH France"
+        )
         st.markdown("---")
-        
+    
         # Menu principal
         page = st.selectbox(
             "🧭 Navigation",
             [
                 "🏠 Dashboard Principal",
-                "📊 Collecte de Données", 
+                "📊 Collecte de Données",
                 "🔍 Qualité des Données",
                 "📈 Analyses Épidémiologiques",
                 "🗺️ Cartographie",
@@ -119,17 +120,18 @@ def main():
                 "🔧 Administration"
             ]
         )
-        
         st.markdown("---")
-        
-        # Statut du système
-        st.subheader("📊 Statut Système")
+    
+        # Statut Système
+        st.markdown('<div class="status-container">', unsafe_allow_html=True)
+        st.markdown('<h4>📊 Statut Système</h4>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("APIs", "✅ 4/4", delta="Actives")
+            st.metric("APIs", "4/4", delta="Actives")
         with col2:
-            st.metric("Données", "📊 Fresh", delta="2h ago")
-            
+            st.metric("Données", "Fresh", delta="2h ago")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
         # Statistiques rapides
         if st.session_state.data_loaded:
             st.markdown("### 📈 Aperçu Rapide")
